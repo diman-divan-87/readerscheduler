@@ -1,0 +1,8 @@
+---
+domain: "vector-best.ru"
+sub_domain: "readerscheduler"
+nginx_root_project_path: "/var/www/{{ sub_domain }}"
+nginx_proxy_rewrite: false
+deploy_root: "/opt/nginx/sites"
+deploy_path: "releases/{{ sub_domain }}/{{ version }}"
+symlink_path: "{{ deploy_root }}/{{ sub_domain }}"

@@ -1,0 +1,2 @@
+[prod]
+10.4.100.121 ansible_user=sadmin

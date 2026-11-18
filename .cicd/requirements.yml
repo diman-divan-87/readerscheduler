@@ -1,0 +1,3 @@
+- src: git+https://gitlab.vector-best.ru/DevelopersOIT/devops/ansible-roles/ansible-role-nginx.git
+  version: origin/main
+  name: nginx

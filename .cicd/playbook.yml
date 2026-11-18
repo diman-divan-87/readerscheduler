@@ -1,0 +1,46 @@
+---
+- hosts: all
+  become: true
+  roles:
+    - nginx
+
+  tasks:
+    - name: Create deployment directory structure
+      file:
+        path: "{{ deploy_root }}"
+        state: directory
+        mode: '0755'
+
+    - name: Copy site in {{ deploy_root }}/{{ deploy_path }}
+      copy:
+        src: ../build/
+        dest: "{{ deploy_root }}/{{ deploy_path }}"
+    
+    - name: Check if {{ symlink_path }} is directory or symlink
+      stat:
+        path: "{{ symlink_path }}"
+      register: symlink_stat
+
+    - name: Remove directory {{ symlink_path }} if it's not a symlink
+      file:
+        path: "{{ symlink_path }}"
+        state: absent
+      when: 
+        - symlink_stat.stat.exists
+        - not symlink_stat.stat.islnk
+        - symlink_stat.stat.isdir
+
+    - name: Update {{ sub_domain }} symlink to new release
+      file:
+        src: "{{ deploy_path }}"
+        dest: "{{ symlink_path }}"
+        state: link
+        force: yes
+
+    - name: Clean up old releases (keep last 3)
+      become: true
+      shell: "ls -1t {{ deploy_root }}/releases/{{ sub_domain }} | tail -n +4 | xargs -I {} rm -rf {{ deploy_root }}/releases/{{ sub_domain }}/{}"
+      args:
+        executable: /bin/bash
+      register: cleanup_result
+      changed_when: cleanup_result.stdout != ""
